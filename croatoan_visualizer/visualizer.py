@@ -1,7 +1,6 @@
-from typing import List
+from typing import Union
 
 import pandas as pd
-import plotly.graph_objects as go
 import plotly.express as px
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
@@ -9,224 +8,238 @@ from sklearn.preprocessing import StandardScaler
 
 
 class Visualizer():
-    def __init__(self, df, id_col='id', target_col="target"):
-        self.df = df
-        self.id = df[id_col]
-        self.y = df[target_col]
-        self.X = StandardScaler().fit_transform(df.drop(columns=[id_col, target_col]))
+    """
+    A class used to visualize features using PCA and TSNE.
 
-    def plot_2d(self,
-                data: pd.DataFrame,
-                x: str,
-                y: str,
-                color: str = 'target',
-                custom_data: List[str] = ['id', 'target'],
-                hover_name: str = 'id',
-                hover_data: List[str] = ['target'],
-                width=960,
-                height=640,
-                colorscale='Inferno'):
+    Attributes:
+        `df` (pd.DataFrame): Dataframe with numerical features,
+        unique ids under `ID` column and targets under `Target` column.
+        `plotly_args` (dict): Dict with args for plotly charts.
 
-        fig = px.scatter(data_frame=data,
-                         x=x,
-                         y=y,
-                         width=width,
-                         height=height,
-                         custom_data=custom_data,
-                         hover_name=hover_name,
-                         hover_data=hover_data,
-                         template='plotly_dark')
+    Methods:
+        `set_plotly_args(**kwargs)`: Sets args for plotly charts.
+        `pca2d()`: Plots PCA for features with 2 components.
+        `pca3d()`: Plots PCA for features with 3 components.
+        `tsne2d(perplexity, n_iter, pca_reduction)`: Plots TSNE for
+        features with 2 components.
+        `tsne3d(perplexity, n_iter, pca_reduction)`: Plots TSNE for
+        features with 3 components.
+    """
+
+    def __init__(
+        self,
+        df: pd.DataFrame,
+        id_column: str,
+        target_column: str
+    ):
+        """
+        Args:
+            `df` (pd.DataFrame): Dataframe with numerical features,
+            unique ids and targets.
+            `id_column` (str): Name of column with unique ids.
+            `target_column` (str): Name of column with targets.
+        """
+        self.df = df.rename(
+            columns={id_column: "ID", target_column: "Target"}
+        )
+        self._X = StandardScaler().fit_transform(
+            X=self.df.drop(columns=["ID", "Target"])
+        )
+        self.set_plotly_args(font_size=14)
+
+    def set_plotly_args(self, **kwargs):
+        """
+        Sets plotly args for charts.
+
+        Args:
+            `**kwargs`: named arguments for plotly `update_layout()` method
+            (name of arguments must match arguments from this method).
+            Example: `font_size=14, template='plotly_dark'`.
+        """
+        self.plotly_args = kwargs
+
+    def _plot_2d(
+        self,
+        data: pd.DataFrame,
+        x: str,
+        y: str,
+    ):
+        fig = px.scatter(
+            data_frame=data,
+            x=x,
+            y=y,
+            custom_data=["ID", "Target"],
+            hover_name="ID",
+            hover_data=["Target"]
+        )
 
         fig.update_traces(marker=dict(
             size=20,
-            color=data[color],
-            colorscale=colorscale,
+            color=data["Target"],
+            # colorscale='Inferno',
             showscale=True,
             line_width=1
         ),
             selector=dict(mode='markers'))
 
-        return fig
+        fig.update_layout(**self.plotly_args)
+        fig.show()
 
-    def plot_3d(self,
-                data: pd.DataFrame,
-                x: str,
-                y: str,
-                z: str,
-                color: str = 'target',
-                custom_data: List[str] = ['id', 'target'],
-                hover_name: str = 'id',
-                hover_data: List[str] = ['target'],
-                width=960,
-                height=640,
-                colorscale='Inferno'):
-
-        fig = px.scatter_3d(data_frame=data,
-                            x=x,
-                            y=y,
-                            z=z,
-                            width=width,
-                            height=height,
-                            custom_data=custom_data,
-                            hover_name=hover_name,
-                            hover_data=hover_data,
-                            template='plotly_dark')
+    def _plot_3d(
+        self,
+        data: pd.DataFrame,
+        x: str,
+        y: str,
+        z: str
+    ):
+        fig = px.scatter_3d(
+            data_frame=data,
+            x=x,
+            y=y,
+            z=z,
+            custom_data=["ID", "Target"],
+            hover_name="ID",
+            hover_data=["Target"]
+        )
 
         fig.update_traces(marker=dict(
-            size=20,
-            color=data[color],
-            colorscale=colorscale,
+            size=15,
+            color=data["Target"],
+            # colorscale='Inferno',
             showscale=True,
-            line_width=1
+            line_width=2
         ),
             selector=dict(mode='markers'))
 
-        return fig
+        fig.update_layout(**self.plotly_args)
+        fig.show()
 
-    def _plot_2d(self, component1, component2, colors, width=960, height=640, colorscale='Inferno'): #portland, rdylbu
-        fig = go.Figure(data=go.Scatter(
-            x=component1,
-            y=component2,
-            mode='markers',
-            marker=dict(
-                size=20,
-                color=colors,  # set color equal to a variable
-                colorscale=colorscale,  # one of plotly colorscales
-                showscale=True,
-                line_width=1
-            ),
-            # hover_name=self.smiles,
-            # hover_data=self.y
-        ))
-        fig.update_layout(margin=dict(l=100, r=100, b=100, t=100), width=width, height=height)
-        fig.layout.template = 'plotly_dark'
+    def pca2d(self):
+        """
+        Plots PCA for features with 2 components.
+        """
+        pca = PCA(n_components=2, random_state=42)
+        principal_components = pca.fit_transform(self._X)
 
-        # fig.show()
-        return fig
+        print("[INFO] Explained variaence ratio: "
+              f"{pca.explained_variance_ratio_}")
 
+        x_col, y_col = 'PCA_1', 'PCA_2'
 
-    def _plot_3d(self, component1, component2, component3, colors, width=960, height=640, colorscale='Inferno'):
-        fig = go.Figure(data=[go.Scatter3d(
-            x=component1,
-            y=component2,
-            z=component3,
-            mode='markers',
-            marker=dict(
-                size=10,
-                color=colors,  # set color equal to a variable
-                colorscale=colorscale,  # one of plotly colorscales
-                opacity=1,
-                showscale=True,
-                line_width=1
-            )
-        )])
-        # tight layout
-        fig.update_layout(margin=dict(l=50, r=50, b=50, t=50), width=width, height=height)
-        fig.layout.template = 'plotly_dark'
+        vis_df = pd.DataFrame(
+            data=principal_components[:, 0:2],
+            columns=[x_col, y_col]
+        ).assign(Target=self.df['Target'], ID=self.df['ID'])
 
-        # fig.show()
-        return fig
+        self._plot_2d(vis_df, x_col, y_col)
 
+    def pca3d(self):
+        """
+        Plots PCA for features with 3 components.
+        """
+        pca = PCA(n_components=3, random_state=42)
+        principal_components = pca.fit_transform(self._X)
 
-    def _pca2d(self, colors=None, **kwargs):
-        pca = PCA(n_components=2)
-        principalComponents = pca.fit_transform(self.X)
+        print("[INFO] Explained variaence ratio: "
+              f"{pca.explained_variance_ratio_}")
 
-        print(f'Explained_var: {pca.explained_variance_ratio_}')
+        x_col, y_col, z_col = 'PCA_1', 'PCA_2', 'PCA_3'
 
-        if colors is None:
-            colors = self.y
+        vis_df = pd.DataFrame(
+            data=principal_components[:, 0:3],
+            columns=[x_col, y_col, z_col]
+        ).assign(Target=self.df['Target'], ID=self.df['ID'])
 
-        return self.plot_2d(principalComponents[:, 0], principalComponents[:, 1], colors, **kwargs)
+        self._plot_3d(vis_df, x_col, y_col, z_col)
 
-    def pca2d(self, color: str = 'target', **kwargs):
-        pca = PCA(n_components=2)
-        principal_components = pca.fit_transform(self.X)
+    def tsne2d(
+        self,
+        perplexity: float = 30.0,
+        n_iter: int = 1000,
+        pca_reduction: Union[None, int] = None,
+    ):
+        """
+        Plots TSNE for features with 2 components.
 
-        print(f'Explained_var: {pca.explained_variance_ratio_}')
-
-        x_col, y_col = 'pca1', 'pca2'
-
-        vis_df = pd.DataFrame(principal_components[:, 0:2], columns=[x_col, y_col])
-        vis_df = vis_df.assign(target=self.df['target'], id=self.df['id'])
-        if 'hover_data' in kwargs.keys():
-            for el in kwargs['hover_data']:
-                vis_df = vis_df.assign(**{el:self.df[el]})
-
-        return self.plot_2d(vis_df, x_col, y_col, color, **kwargs)
-
-    def _pca3d(self, colors=None, **kwargs):
-        pca = PCA(n_components=3)
-        principalComponents = pca.fit_transform(self.X)
-
-        print(f'Explained_var: {pca.explained_variance_ratio_}')
-
-        if colors is None:
-            colors = self.y
-
-        return self.plot_3d(principalComponents[:, 0], principalComponents[:, 1], principalComponents[:, 2], colors, **kwargs)
-
-    def pca3d(self, color: str = 'target', **kwargs):
-        pca = PCA(n_components=3)
-        principal_components = pca.fit_transform(self.X)
-
-        print(f'Explained_var: {pca.explained_variance_ratio_}')
-
-        x_col, y_col, z_col = 'pca1', 'pca2', 'pca3'
-
-        vis_df = pd.DataFrame(principal_components[:, 0:3], columns=[x_col, y_col, z_col])
-        vis_df = vis_df.assign(target=self.df['target'], id=self.df['id'])
-
-        return self.plot_3d(vis_df, x_col, y_col, z_col, color, **kwargs)
-
-    def tsne2d(self, perplexity=30, n_iter=1000, pca_reduction=False, color: str = 'target', **kwargs):
-        X = self.X
+        Args:
+            `perplexity` (float): The perplexity is related to the number of
+            nearest neighbors that is used in other manifold learning
+            algorithms. Larger datasets usually require a larger perplexity.
+            Consider selecting a value between 5 and 50. Different values
+            can result in significantly different results. The perplexity
+            must be less that the number of samples. Default is `30.0`.
+            `n_iter` (int): Maximum number of iterations for the optimization.
+            Should be at least 250. Default is `1000`.
+            `pca_reduction` (int): Number of components for PCA to use
+            before TSNE if specified. If `None` do not use PCA before TSNE.
+            Default is `None`.
+        """
+        X = self._X
 
         if pca_reduction:
             pca = PCA(n_components=pca_reduction)
             X = pca.fit_transform(X)
 
-        tsne = TSNE(random_state=47, n_components=2, verbose=0, perplexity=perplexity, n_iter=n_iter, n_jobs=-1)\
-            .fit_transform(X)
+        tsne = TSNE(
+            random_state=47,
+            n_components=2,
+            verbose=0,
+            perplexity=perplexity,
+            n_iter=n_iter,
+            n_jobs=-1
+        ).fit_transform(X)
 
-        x_col, y_col = 'x', 'y'
+        x_col, y_col = 'TSNE_1', 'TSNE_2'
 
-        vis_df = pd.DataFrame(tsne[:, 0:2], columns=[x_col, y_col])
-        vis_df = vis_df.assign(target=self.df['target'], id=self.df['id'])
+        vis_df = pd.DataFrame(
+            data=tsne[:, 0:2],
+            columns=[x_col, y_col]
+        ).assign(Target=self.df['Target'], ID=self.df['ID'])
 
-        return self.plot_2d(vis_df, x_col, y_col, color, **kwargs)
+        self._plot_2d(vis_df, x_col, y_col)
 
+    def tsne3d(
+        self,
+        perplexity: float = 30.0,
+        n_iter: int = 1000,
+        pca_reduction: Union[None, int] = None,
+    ):
+        """
+        Plots TSNE for features with 3 components.
 
-    def _tsne3d(self, perplexity=30, n_iter=1000, pca_reduction=False, colors=None, **kwargs):
-        X = self.X
+        Args:
+            `perplexity` (float): The perplexity is related to the number of
+            nearest neighbors that is used in other manifold learning
+            algorithms. Larger datasets usually require a larger perplexity.
+            Consider selecting a value between 5 and 50. Different values
+            can result in significantly different results. The perplexity
+            must be less that the number of samples. Default is `30.0`.
+            `n_iter` (int): Maximum number of iterations for the optimization.
+            Should be at least 250. Default is `1000`.
+            `pca_reduction` (int): Number of components for PCA to use
+            before TSNE if specified. If `None` do not use PCA before TSNE.
+            Default is `None`.
+        """
+        X = self._X
 
         if pca_reduction:
             pca = PCA(n_components=pca_reduction)
             X = pca.fit_transform(X)
 
-        tsne = TSNE(random_state=42, n_components=3, verbose=0, perplexity=perplexity, n_iter=n_iter) \
-            .fit_transform(X)
+        tsne = TSNE(
+            random_state=42,
+            n_components=3,
+            verbose=0,
+            perplexity=perplexity,
+            n_iter=n_iter,
+            n_jobs=-1
+        ).fit_transform(X)
 
-        if colors is None:
-            colors = self.y
+        x_col, y_col, z_col = 'TSNE_1', 'TSNE_2', 'TSNE_3'
 
-        return self.plot_3d(tsne[:, 0], tsne[:, 1], tsne[:, 2], colors, **kwargs)
+        vis_df = pd.DataFrame(
+            data=tsne[:, 0:3],
+            columns=[x_col, y_col, z_col]
+        ).assign(Target=self.df['Target'], ID=self.df['ID'])
 
-
-    def tsne3d(self, perplexity=30, n_iter=1000, pca_reduction=False, color: str = 'target', **kwargs):
-        X = self.X
-
-        if pca_reduction:
-            pca = PCA(n_components=pca_reduction)
-            X = pca.fit_transform(X)
-
-        tsne = TSNE(random_state=42, n_components=3, verbose=0, perplexity=perplexity, n_iter=n_iter, n_jobs=-1) \
-            .fit_transform(X)
-
-        x_col, y_col, z_col = 'pca1', 'pca2', 'pca3'
-
-        vis_df = pd.DataFrame(tsne[:, 0:3], columns=[x_col, y_col, z_col])
-        vis_df = vis_df.assign(target=self.df['target'], id=self.df['id'])
-
-        return self.plot_3d(vis_df, x_col, y_col, z_col, color, **kwargs)
-
+        self._plot_3d(vis_df, x_col, y_col, z_col)
