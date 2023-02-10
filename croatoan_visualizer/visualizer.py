@@ -18,12 +18,12 @@ class Visualizer():
 
     Methods:
         `set_plotly_args(**kwargs)`: Sets args for plotly charts.
-        `pca2d()`: Plots PCA for features with 2 components.
-        `pca3d()`: Plots PCA for features with 3 components.
-        `tsne2d(perplexity, n_iter, pca_reduction)`: Plots TSNE for
-        features with 2 components.
-        `tsne3d(perplexity, n_iter, pca_reduction)`: Plots TSNE for
-        features with 3 components.
+        `pca2d()`: Uses PCA with 2 components and plots 2D chart.
+        `pca3d()`: Uses PCA with 3 components and plots 3D chart.
+        `tsne2d(perplexity, n_iter, pca_reduction)`: Uses TSNE
+        and plots 2D chart.
+        `tsne3d(perplexity, n_iter, pca_reduction)`: Uses TSNE
+        and plots 3D chart.
     """
 
     def __init__(
@@ -116,7 +116,7 @@ class Visualizer():
 
     def pca2d(self):
         """
-        Plots PCA for features with 2 components.
+        Uses PCA with 2 components and plots 2D chart.
         """
         pca = PCA(n_components=2, random_state=42)
         principal_components = pca.fit_transform(self._X)
@@ -135,7 +135,7 @@ class Visualizer():
 
     def pca3d(self):
         """
-        Plots PCA for features with 3 components.
+        Uses PCA with 3 components and plots 3D chart.
         """
         pca = PCA(n_components=3, random_state=42)
         principal_components = pca.fit_transform(self._X)
@@ -159,7 +159,7 @@ class Visualizer():
         pca_reduction: Union[None, int] = None,
     ):
         """
-        Plots TSNE for features with 2 components.
+        Uses TSNE and plots 2D chart.
 
         Args:
             `perplexity` (float): The perplexity is related to the number of
@@ -205,7 +205,7 @@ class Visualizer():
         pca_reduction: Union[None, int] = None,
     ):
         """
-        Plots TSNE for features with 3 components.
+        Uses TSNE and plots 3D chart.
 
         Args:
             `perplexity` (float): The perplexity is related to the number of
