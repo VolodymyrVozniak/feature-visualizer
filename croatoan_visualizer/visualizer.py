@@ -30,7 +30,8 @@ class Visualizer():
         self,
         df: pd.DataFrame,
         id_column: str,
-        target_column: str
+        target_column: str,
+        standardise: bool = True
     ):
         """
         Args:
@@ -38,13 +39,15 @@ class Visualizer():
             unique ids and targets.
             `id_column` (str): Name of column with unique ids.
             `target_column` (str): Name of column with targets.
+            `standardise` (bool): Standardize features by removing
+            the mean and scaling to unit variance. Default is `True`.
         """
         self.df = df.rename(
             columns={id_column: "ID", target_column: "Target"}
         )
-        self._X = StandardScaler().fit_transform(
-            X=self.df.drop(columns=["ID", "Target"])
-        )
+        self._X = self.df.drop(columns=["ID", "Target"])
+        if standardise:
+            self._X = StandardScaler().fit_transform(self._X)
         self.set_plotly_args(font_size=14)
 
     def set_plotly_args(self, **kwargs):
