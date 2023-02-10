@@ -1,6 +1,6 @@
 from sklearn.datasets import load_breast_cancer
 
-from croatoan_visualizer import Visualizer
+from croatoan_visualizer.visualizer import Visualizer
 
 
 def test_binary():

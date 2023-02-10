@@ -51,7 +51,7 @@ There is 1 main class for feature visualization:
 
 ```python
 from sklearn.datasets import load_breast_cancer
-from croatoan_visualizer import Visualizer
+from croatoan_visualizer.visualizer import Visualizer
 
 
 X, y = load_breast_cancer(return_X_y=True, as_frame=True)
@@ -78,7 +78,7 @@ For more details check [tutorial](https://colab.research.google.com/drive/12jAyk
 
 ```python
 from sklearn.datasets import load_diabetes
-from croatoan_visualizer import Visualizer
+from croatoan_visualizer.visualizer import Visualizer
 
 
 X, y = load_diabetes(return_X_y=True, as_frame=True)
@@ -106,7 +106,7 @@ For more details check [tutorial](https://colab.research.google.com/drive/19rEMc
 
 ```python
 from sklearn.datasets import load_iris
-from croatoan_visualizer import Visualizer
+from croatoan_visualizer.visualizer import Visualizer
 
 
 X, y = load_iris(return_X_y=True, as_frame=True)

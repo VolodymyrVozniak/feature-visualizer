@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.datasets import load_diabetes
 
-from croatoan_visualizer import Visualizer
+from croatoan_visualizer.visualizer import Visualizer
 
 
 def test_regression():
