@@ -43,7 +43,9 @@ plotly>=5.7.0
 There is 1 main class for feature visualization:
 * `Visualizer` - to visualize features for binary, regression and multiclassification problems
 
-Examples
+</br>
+
+## Examples
 
 * Binary problem
 
