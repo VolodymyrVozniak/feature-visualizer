@@ -132,7 +132,7 @@ class Visualizer():
         vis_df = pd.DataFrame(
             data=principal_components[:, 0:2],
             columns=[x_col, y_col]
-        ).assign(Target=self.df['Target'], ID=self.df['ID'])
+        ).assign(Target=self.df['Target'].tolist(), ID=self.df['ID'].tolist())
 
         self._plot_2d(vis_df, x_col, y_col)
 
@@ -151,7 +151,7 @@ class Visualizer():
         vis_df = pd.DataFrame(
             data=principal_components[:, 0:3],
             columns=[x_col, y_col, z_col]
-        ).assign(Target=self.df['Target'], ID=self.df['ID'])
+        ).assign(Target=self.df['Target'].tolist(), ID=self.df['ID'].tolist())
 
         self._plot_3d(vis_df, x_col, y_col, z_col)
 
@@ -197,7 +197,7 @@ class Visualizer():
         vis_df = pd.DataFrame(
             data=tsne[:, 0:2],
             columns=[x_col, y_col]
-        ).assign(Target=self.df['Target'], ID=self.df['ID'])
+        ).assign(Target=self.df['Target'].tolist(), ID=self.df['ID'].tolist())
 
         self._plot_2d(vis_df, x_col, y_col)
 
@@ -243,6 +243,6 @@ class Visualizer():
         vis_df = pd.DataFrame(
             data=tsne[:, 0:3],
             columns=[x_col, y_col, z_col]
-        ).assign(Target=self.df['Target'], ID=self.df['ID'])
+        ).assign(Target=self.df['Target'].tolist(), ID=self.df['ID'].tolist())
 
         self._plot_3d(vis_df, x_col, y_col, z_col)
