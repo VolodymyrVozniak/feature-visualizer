@@ -48,7 +48,7 @@ class Visualizer():
             "ID": df[id_column],
             "Target": df[target_column]
         })
-        self.X = df.drop(columns=["ID", "Target"]).values
+        self.X = df.drop(columns=[id_column, target_column]).values
         if scale:
             self.X = StandardScaler().fit_transform(self.X)
         self.set_plotly_args(font_size=14)
