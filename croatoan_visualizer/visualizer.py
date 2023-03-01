@@ -12,8 +12,10 @@ class Visualizer():
     A class used to visualize features using PCA and TSNE.
 
     Attributes:
-        `df` (pd.DataFrame): Dataframe with numerical features,
-        unique ids under `ID` column and targets under `Target` column.
+        `df` (pd.DataFrame): Dataframe with unique ids under
+        `ID` column and targets under `Target` column.
+        `X` (np.ndarray): Features got from input dataframe
+        and scaled (optionally).
         `plotly_args` (dict): Dict with args for plotly charts.
 
     Methods:
@@ -31,7 +33,7 @@ class Visualizer():
         df: pd.DataFrame,
         id_column: str,
         target_column: str,
-        standardise: bool = True
+        scale: bool = True
     ):
         """
         Args:
@@ -39,15 +41,16 @@ class Visualizer():
             unique ids and targets.
             `id_column` (str): Name of column with unique ids.
             `target_column` (str): Name of column with targets.
-            `standardise` (bool): Standardize features by removing
-            the mean and scaling to unit variance. Default is `True`.
+            `scale` (bool): Scale features by removing the mean and
+            scaling to unit variance. Default is `True`.
         """
-        self.df = df.rename(
-            columns={id_column: "ID", target_column: "Target"}
-        )
-        self._X = self.df.drop(columns=["ID", "Target"])
-        if standardise:
-            self._X = StandardScaler().fit_transform(self._X)
+        self.df = pd.DataFrame(data={
+            "ID": df[id_column],
+            "Target": df[target_column]
+        })
+        self.X = df.drop(columns=["ID", "Target"]).values
+        if scale:
+            self.X = StandardScaler().fit_transform(self.X)
         self.set_plotly_args(font_size=14)
 
     def set_plotly_args(self, **kwargs):
@@ -122,7 +125,7 @@ class Visualizer():
         Uses PCA with 2 components and plots 2D chart.
         """
         pca = PCA(n_components=2, random_state=42)
-        principal_components = pca.fit_transform(self._X)
+        principal_components = pca.fit_transform(self.X)
 
         print("[INFO] Explained variaence ratio: "
               f"{pca.explained_variance_ratio_}")
@@ -132,7 +135,8 @@ class Visualizer():
         vis_df = pd.DataFrame(
             data=principal_components[:, 0:2],
             columns=[x_col, y_col]
-        ).assign(Target=self.df['Target'].tolist(), ID=self.df['ID'].tolist())
+        )
+        vis_df = pd.concat([vis_df, self.df], axis=1)
 
         self._plot_2d(vis_df, x_col, y_col)
 
@@ -141,7 +145,7 @@ class Visualizer():
         Uses PCA with 3 components and plots 3D chart.
         """
         pca = PCA(n_components=3, random_state=42)
-        principal_components = pca.fit_transform(self._X)
+        principal_components = pca.fit_transform(self.X)
 
         print("[INFO] Explained variaence ratio: "
               f"{pca.explained_variance_ratio_}")
@@ -151,7 +155,8 @@ class Visualizer():
         vis_df = pd.DataFrame(
             data=principal_components[:, 0:3],
             columns=[x_col, y_col, z_col]
-        ).assign(Target=self.df['Target'].tolist(), ID=self.df['ID'].tolist())
+        )
+        vis_df = pd.concat([vis_df, self.df], axis=1)
 
         self._plot_3d(vis_df, x_col, y_col, z_col)
 
@@ -177,7 +182,7 @@ class Visualizer():
             before TSNE if specified. If `None` do not use PCA before TSNE.
             Default is `None`.
         """
-        X = self._X
+        X = self.X
 
         if pca_reduction:
             pca = PCA(n_components=pca_reduction)
@@ -197,7 +202,8 @@ class Visualizer():
         vis_df = pd.DataFrame(
             data=tsne[:, 0:2],
             columns=[x_col, y_col]
-        ).assign(Target=self.df['Target'].tolist(), ID=self.df['ID'].tolist())
+        )
+        vis_df = pd.concat([vis_df, self.df], axis=1)
 
         self._plot_2d(vis_df, x_col, y_col)
 
@@ -223,7 +229,7 @@ class Visualizer():
             before TSNE if specified. If `None` do not use PCA before TSNE.
             Default is `None`.
         """
-        X = self._X
+        X = self.X
 
         if pca_reduction:
             pca = PCA(n_components=pca_reduction)
@@ -243,6 +249,7 @@ class Visualizer():
         vis_df = pd.DataFrame(
             data=tsne[:, 0:3],
             columns=[x_col, y_col, z_col]
-        ).assign(Target=self.df['Target'].tolist(), ID=self.df['ID'].tolist())
+        )
+        vis_df = pd.concat([vis_df, self.df], axis=1)
 
         self._plot_3d(vis_df, x_col, y_col, z_col)
