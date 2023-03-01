@@ -45,8 +45,8 @@ class Visualizer():
             scaling to unit variance. Default is `True`.
         """
         self.df = pd.DataFrame(data={
-            "ID": df[id_column],
-            "Target": df[target_column]
+            "ID": df[id_column].tolist(),
+            "Target": df[target_column].tolist()
         })
         self.X = df.drop(columns=[id_column, target_column]).values
         if scale:
