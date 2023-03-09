@@ -32,7 +32,7 @@ class Visualizer():
         self,
         df: pd.DataFrame,
         id_column: str,
-        target_column: str,
+        target_column: Union[None, str],
         scale: bool = True
     ):
         """
@@ -41,17 +41,40 @@ class Visualizer():
             unique ids and targets.
             `id_column` (str): Name of column with unique ids.
             `target_column` (str): Name of column with targets.
+            If `None` plot features without targets.
             `scale` (bool): Scale features by removing the mean and
             scaling to unit variance. Default is `True`.
         """
-        self.df = pd.DataFrame(data={
-            "ID": df[id_column].tolist(),
-            "Target": df[target_column].tolist()
-        })
-        self.X = df.drop(columns=[id_column, target_column]).values
+        if target_column:
+            self.df = pd.DataFrame(data={
+                "ID": df[id_column].tolist(),
+                "Target": df[target_column].tolist()
+            })
+            self.X = df.drop(columns=[id_column, target_column]).values
+        else:
+            self.df = pd.DataFrame(data={"ID": df[id_column].tolist()})
+            self.X = df.drop(columns=[id_column]).values
+
         if scale:
             self.X = StandardScaler().fit_transform(self.X)
+
+        self.__init_plotly_args(target_column)
+
         self.set_plotly_args(font_size=14)
+
+    def __init_plotly_args(self, target_column: Union[None, str]):
+        if target_column:
+            self.__hover_data = ["Target"]
+            self.__showscale = True
+        else:
+            self.__hover_data = None
+            self.__showscale = False
+
+    def __get_color(self, data):
+        try:
+            return data["Target"]
+        except KeyError:
+            return None
 
     def set_plotly_args(self, **kwargs):
         """
@@ -74,17 +97,17 @@ class Visualizer():
             data_frame=data,
             x=x,
             y=y,
-            custom_data=["ID", "Target"],
+            # custom_data=["ID", "Target"],
             hover_name="ID",
-            hover_data=["Target"]
+            hover_data=self.__hover_data
         )
 
         fig.update_traces(marker=dict(
             size=20,
-            color=data["Target"],
+            color=self.__get_color(data),
             # colorscale='Inferno',
-            showscale=True,
-            line_width=1
+            showscale=self.__showscale,
+            line_width=2
         ),
             selector=dict(mode='markers'))
 
@@ -103,16 +126,16 @@ class Visualizer():
             x=x,
             y=y,
             z=z,
-            custom_data=["ID", "Target"],
+            # custom_data=["ID", "Target"],
             hover_name="ID",
-            hover_data=["Target"]
+            hover_data=self.__hover_data
         )
 
         fig.update_traces(marker=dict(
             size=15,
-            color=data["Target"],
+            color=self.__get_color(data),
             # colorscale='Inferno',
-            showscale=True,
+            showscale=self.__showscale,
             line_width=2
         ),
             selector=dict(mode='markers'))
