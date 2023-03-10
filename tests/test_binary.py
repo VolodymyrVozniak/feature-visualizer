@@ -22,7 +22,7 @@ def test_binary():
     vis.tsne2d(
         perplexity=20,
         n_iter=2000,
-        pca_reduction=15
+        pca_reduction=15,
         metric='cosine'
     )
     vis.tsne3d(
