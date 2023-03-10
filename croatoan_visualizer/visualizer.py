@@ -22,10 +22,10 @@ class Visualizer():
         `set_plotly_args(**kwargs)`: Sets args for plotly charts.
         `pca2d()`: Uses PCA with 2 components and plots 2D chart.
         `pca3d()`: Uses PCA with 3 components and plots 3D chart.
-        `tsne2d(perplexity, n_iter, pca_reduction)`: Uses TSNE
-        and plots 2D chart.
-        `tsne3d(perplexity, n_iter, pca_reduction)`: Uses TSNE
-        and plots 3D chart.
+        `tsne2d(pca_reduction, perplexity, n_iter, metric)`: Uses TSNE and
+        plots 2D chart.
+        `tsne3d(pca_reduction, perplexity, n_iter, metric)`: Uses TSNE and
+        plots 3D chart.
     """
 
     def __init__(
@@ -185,25 +185,33 @@ class Visualizer():
 
     def tsne2d(
         self,
+        pca_reduction: Union[None, int] = None,
         perplexity: float = 30.0,
         n_iter: int = 1000,
-        pca_reduction: Union[None, int] = None,
+        metric: str = "euclidean"
     ):
         """
         Uses TSNE and plots 2D chart.
 
         Args:
+            `pca_reduction` (int): Number of components for PCA to use
+            before TSNE if specified. If `None` do not use PCA before TSNE.
+            Default is `None`.
+
             `perplexity` (float): The perplexity is related to the number of
             nearest neighbors that is used in other manifold learning
             algorithms. Larger datasets usually require a larger perplexity.
             Consider selecting a value between 5 and 50. Different values
             can result in significantly different results. The perplexity
             must be less that the number of samples. Default is `30.0`.
+
             `n_iter` (int): Maximum number of iterations for the optimization.
             Should be at least 250. Default is `1000`.
-            `pca_reduction` (int): Number of components for PCA to use
-            before TSNE if specified. If `None` do not use PCA before TSNE.
-            Default is `None`.
+
+            `metric` (str): The metric to use when calculating distance
+            between instances in a feature array. It must be one of the options
+            allowed by scipy.spatial.distance.pdist for its metric parameter.
+            Default is `"euclidean"` (squared euclidean distance).
         """
         X = self.X
 
@@ -217,6 +225,7 @@ class Visualizer():
             verbose=0,
             perplexity=perplexity,
             n_iter=n_iter,
+            metric=metric,
             n_jobs=-1
         ).fit_transform(X)
 
@@ -232,25 +241,33 @@ class Visualizer():
 
     def tsne3d(
         self,
+        pca_reduction: Union[None, int] = None,
         perplexity: float = 30.0,
         n_iter: int = 1000,
-        pca_reduction: Union[None, int] = None,
+        metric: str = "euclidean"
     ):
         """
         Uses TSNE and plots 3D chart.
 
         Args:
+            `pca_reduction` (int): Number of components for PCA to use
+            before TSNE if specified. If `None` do not use PCA before TSNE.
+            Default is `None`.
+
             `perplexity` (float): The perplexity is related to the number of
             nearest neighbors that is used in other manifold learning
             algorithms. Larger datasets usually require a larger perplexity.
             Consider selecting a value between 5 and 50. Different values
             can result in significantly different results. The perplexity
             must be less that the number of samples. Default is `30.0`.
+
             `n_iter` (int): Maximum number of iterations for the optimization.
             Should be at least 250. Default is `1000`.
-            `pca_reduction` (int): Number of components for PCA to use
-            before TSNE if specified. If `None` do not use PCA before TSNE.
-            Default is `None`.
+
+            `metric` (str): The metric to use when calculating distance
+            between instances in a feature array. It must be one of the options
+            allowed by scipy.spatial.distance.pdist for its metric parameter.
+            Default is `"euclidean"` (squared euclidean distance).
         """
         X = self.X
 
@@ -264,6 +281,7 @@ class Visualizer():
             verbose=0,
             perplexity=perplexity,
             n_iter=n_iter,
+            metric=metric,
             n_jobs=-1
         ).fit_transform(X)
 

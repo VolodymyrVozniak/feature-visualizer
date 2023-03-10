@@ -23,9 +23,11 @@ def test_binary():
         perplexity=20,
         n_iter=2000,
         pca_reduction=15
+        metric='cosine'
     )
     vis.tsne3d(
         perplexity=20,
         n_iter=2000,
-        pca_reduction=15
+        pca_reduction=15,
+        metric='cosine'
     )
